@@ -40,17 +40,18 @@ buildStaticCars()
 loop()
 onWindowResize()
 
-document.addEventListener("click",onDocumentMouseDown)
+document.addEventListener("click", onDocumentMouseDown)
+
 function onDocumentMouseDown(e) {
     e.preventDefault();
     var raycaster = new THREE.Raycaster(),
-    mouse = new THREE.Vector2();
+        mouse = new THREE.Vector2();
     //将鼠标点击位置的屏幕坐标转成threejs中的标准坐标,具体解释见代码释义
     mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
     //新建一个三维单位向量 假设z方向就是0.5
     //根据照相机，把这个向量转换到视点坐标系
-      var vector = new THREE.Vector3(mouse.x, mouse.y,0.5).unproject(camera);
+    var vector = new THREE.Vector3(mouse.x, mouse.y, 0.5).unproject(camera);
 
     //在视点坐标系中形成射线,射线的起点向量是照相机， 射线的方向向量是照相机到点击的点，这个向量应该归一标准化。
     var raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
@@ -195,34 +196,72 @@ function buildbuilding() {
     plane.position.y = -3
     scene.add(plane)
 
-      addFense()
-      addGreen()
-      addTrees()
+    addFense()
+    addGreen()
+    addTrees()
     addHospital()
-      addLamps()
+    addLamps()
+    buildWork()
+    font()
+    function font() {
+        var loader = new THREE.FontLoader();
+
+        loader.load('fonts/gentilis_bold.typeface.json', function (font) {
+
+            var geometry = new THREE.TextGeometry('Hello three.js!', {
+                font: font,
+                size: 80,
+                height: 5,
+                curveSegments: 12,
+                bevelEnabled: true,
+                bevelThickness: 10,
+                bevelSize: 8,
+                bevelSegments: 5
+            });
+        });
+    }
+
+    function buildWork() {
+        var hospital = new THREE.Object3D()
+
+        var baseGeometry = new THREE.BoxBufferGeometry(50, 3, 150)
+        var base = utils.makeMesh('lambert', baseGeometry, 0xffffff)
+        base.position.y = 1
+        base.position.x = 130
+        base.position.z = 30
+        hospital.add(base)
+        scene.add(hospital)
+    }
 
     function addLamps() {
         var lampsPosition = [
+            //上边
             [-12.5, 17.5, 1.25],
-            // [-7.5, 17.5, -0.5],
             [-2.5, 17.5, -0.5],
             [2.5, 17.5, -0.5],
             [7.5, 17.5, -0.5],
             [17.5, 17.5, -0.25],
+
+            //右边
             [17.5, 7.5, 0],
             [17.5, 2.5, 0],
             [17.5, -2.5, 0],
-            [17.5, -7.5, 0],
+            // [17.5, -7.5, 0],
             [17.5, -12.5, 0.25],
+
+
             [7.5, -17.5, 0.5],
             [2.5, -17.5, 0.5],
             [-2.5, -17.5, 0.5],
             [-7.5, -17.5, 0.5],
             [-12.5, -17.5, 0.75],
+            //左边
             [-17.5, -7.5, 1],
             [-17.5, -2.5, 1],
             [-17.5, 2.5, 1],
-            [-17.5, 7.5, 1],
+
+            [-17.5, 12.5, 1],
+            [-17.5, 15.5, 1],
         ]
 
         lampsPosition.forEach(function (elem) {
@@ -251,7 +290,8 @@ function buildbuilding() {
         interHospital.position.y = -20
         interHospital.position.x = 65
         interHospital.scale.set(0.5, 1, 0.5);
-        // interHospital.rotateY(-Math.PI/2);
+        interHospital.name = "interBuild"
+        interHospital.uuid = "12233444"
         scene.add(interHospital)
 
         //外科楼
@@ -278,7 +318,7 @@ function buildbuilding() {
         roomBuild2.position.z = -150
         roomBuild2.position.x = -120
         roomBuild2.scale.set(0.5, 0.5, 0.5);
-        roomBuild2.rotateY(-Math.PI/2);
+        roomBuild2.rotateY(-Math.PI / 2);
         scene.add(roomBuild2);
 
         //食堂
@@ -286,7 +326,7 @@ function buildbuilding() {
         food.position.z = -110
         food.position.x = -30
         food.scale.set(0.5, 0.5, 0.5);
-        food.rotateY(-Math.PI/2);
+        food.rotateY(-Math.PI / 2);
         scene.add(food);
 
         //科研楼
@@ -319,29 +359,63 @@ function buildbuilding() {
 
     function addFense() {
         var fenseCoords = [
-            [-180, -180],
-            [-180, 180],
-            [180, 180],
-            [180, -180],
-            [-30, -180],
-            [-30, -170],
-            [170, -170],
-            [170, 170],
-            [-170, 170],
-            [-170, -170],
-            [-100, -170],
-            [-100, -170],   
-            [-100, -180]
+            [-180, -60], //
+            [-170, -60],
+            [-170, 180],
+            [-180, 180], //左上角第一个点
         ]
+
         var fenseShape = utils.makeShape(fenseCoords)
 
         var fenseGeometry = utils.makeExtrudeGeometry(fenseShape, 3)
         var fense = utils.makeMesh('lambert', fenseGeometry, 0xe5cabf)
         scene.add(fense)
+
+        var before = fense.clone();
+        before.rotateY(0.5 * Math.PI)
+        before.position.x = 120
+        before.scale.set(1, 1, 1)
+        scene.add(before)
+
+        var before2 = fense.clone();
+        before2.rotateY(0.5 * Math.PI)
+        before2.scale.set(1, 1, 0.2)
+        before2.position.x = -140
+        // before2.position.z = 100
+        scene.add(before2);
+
+        var after = before.clone();
+        after.position.z = -350
+        after.position.x = 60
+        after.scale.set(1, 1, 1.3)
+        scene.add(after);
+
+        var reight = fense.clone();
+        reight.rotateY(-Math.PI)
+        reight.scale.set(1, 1, 0.9)
+        reight.position.z = 20
+        scene.add(reight);
+
+        var reight2 = reight.clone();
+        reight2.rotateY(-Math.PI)
+        reight2.position.x = 350
+        reight2.position.z = -130
+        reight2.scale.set(1, 1, 0.3)
+        scene.add(reight2);
+
+
+
+        var left = fense.clone();
+        left.scale.set(1, 1, 0.3)
+        left.position.z = 160
+        scene.add(left);
+
+
     }
 
     function addTrees() {
         var treesPosition = [
+            //后边
             [-170, -175],
             [-140, -175],
             [-110, -175],
@@ -356,9 +430,11 @@ function buildbuilding() {
             [120, -175],
             [150, -175],
             [-175, 175],
+
+            //左边
             [-175, 150],
             [-175, 120],
-            [-175, 90],
+            // [-175, 90],
             [-175, 60],
             [-175, 30],
             [-175, 0],
@@ -367,24 +443,22 @@ function buildbuilding() {
             [-175, -90],
             [-175, -120],
             [-175, -150],
+
+
             [140, 175],
             [110, 175],
             [80, 175],
             [50, 175],
             [20, 175],
             [-10, 175],
-            // [-40, 175],
-            // [-70, 175],
-            // [-100, 175],
+
             [-130, 175],
             [-160, 175],
-           
+
+            //左边
             [175, -170],
             [175, -140],
             [175, -110],
-            [175, -90],
-            [175, -60],
-            [175, -30],
             [175, 0],
             [175, 30],
             [175, 60],
@@ -632,7 +706,7 @@ function buildbuilding() {
 
     function createInterBuild() {
         var hospital = new THREE.Object3D()
-
+        hospital.name = "interBuild"
         var baseGeometry = new THREE.BoxBufferGeometry(180, 3, 140)
         // var base = utils.makeMesh('lambert', baseGeometry, 0xffffff)
         var base = utils.makeMesh('lambert', baseGeometry, 'white')
@@ -663,6 +737,7 @@ function buildbuilding() {
 
     function createOutBuild() {
         var hospital = new THREE.Object3D()
+        hospital.name = "outBuild"
 
         // var baseGeometry = new THREE.BoxBufferGeometry(180, 3, 140)
         // var base = utils.makeMesh('lambert', baseGeometry, 'white')
@@ -722,7 +797,7 @@ function buildbuilding() {
         return build
     }
 
-    function foodBuild(){
+    function foodBuild() {
         var build = new THREE.Object3D()
         var backMainCoords = [
             [-80, 20],
@@ -750,7 +825,8 @@ function buildbuilding() {
         build.add(backMiddle);
         return build
     }
-    function createScienceBuild(){
+
+    function createScienceBuild() {
         var build = new THREE.Object3D()
         var backMainCoords = [
             [-80, 20],
@@ -780,7 +856,7 @@ function buildbuilding() {
         return build
     }
 
-    function buildRoof(){
+    function buildRoof() {
         var backMiddleCoords = [
             [0, 0],
             [36, 0],
